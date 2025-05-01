@@ -570,6 +570,9 @@
             const expiresIn = tokenData.expires_in || 'unknown';
             const scope = tokenData.scope || 'unknown';
             
+            // Store token data in a global variable for the download function
+            window.tokenDataForDownload = tokenData;
+            
             const html = `
                 <h3 class="success">Token Exchange Successful!</h3>
                 <p>You have successfully obtained an access token for the TikTok API.</p>
@@ -583,7 +586,12 @@
                 <p><strong>Scope:</strong> ${scope}</p>
                 <p><strong>Refresh Token:</strong> ${tokenData.refresh_token ? 'Available' : 'Not available'}</p>
                 <p>Copy this token and use it in your application, or download the complete token data:</p>
-                <button onclick="downloadTokenData(${JSON.stringify(tokenData)})">Download Token Data (JSON)</button>
+                <button onclick="downloadTokenData()">Download Token Data (JSON)</button>
+                <div class="manual-json">
+                    <p>If download doesn't work, copy this JSON and save it as tiktok_token.json:</p>
+                    <textarea readonly style="width: 100%; height: 150px;">${JSON.stringify(tokenData, null, 2)}</textarea>
+                    <button onclick="copyJsonData()">Copy JSON</button>
+                </div>
             `;
             
             resultElement.innerHTML = html;
@@ -602,8 +610,26 @@
                 });
         }
         
+        // Copy JSON data to clipboard
+        function copyJsonData() {
+            const jsonText = JSON.stringify(window.tokenDataForDownload, null, 2);
+            navigator.clipboard.writeText(jsonText)
+                .then(() => {
+                    alert('JSON data copied to clipboard!');
+                })
+                .catch(err => {
+                    alert('Could not copy JSON. Please select and copy manually.');
+                });
+        }
+        
         // Download token data as JSON file
-        function downloadTokenData(tokenData) {
+        function downloadTokenData() {
+            const tokenData = window.tokenDataForDownload;
+            if (!tokenData) {
+                alert('No token data available for download');
+                return;
+            }
+            
             const jsonString = JSON.stringify(tokenData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
