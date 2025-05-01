@@ -3,36 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Authorization Complete</title>
+    <title>TikTok Authorization Handler</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            text-align: center;
+            line-height: 1.6;
         }
         .container {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
-            margin-top: 50px;
+            margin-top: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .params {
-            background-color: #e9ecef;
+        .code-display {
+            background-color: #edf2ff;
+            border: 2px solid #4a6fff;
             border-radius: 4px;
             padding: 15px;
             margin: 20px 0;
-            text-align: left;
             font-family: monospace;
+            font-size: 16px;
             word-break: break-all;
+            position: relative;
         }
-        h1 {
+        .code-variations {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .code-variation {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #4a6fff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        h1, h2, h3 {
             color: #333;
         }
         .success {
             color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .warning {
+            color: orange;
             font-weight: bold;
         }
         .info {
@@ -40,20 +75,210 @@
             font-size: 14px;
             color: #6c757d;
         }
+        .instructions {
+            background-color: #d1e7dd;
+            border-left: 4px solid #198754;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .debug-section {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4a6fff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .accordion {
+            background-color: #f1f1f1;
+            color: #333;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            transition: 0.4s;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .active, .accordion:hover {
+            background-color: #e0e0e0;
+        }
+        .panel {
+            padding: 0 18px;
+            background-color: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            border-radius: 0 0 4px 4px;
+            border: 1px solid #f1f1f1;
+            border-top: none;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: #333;
+            margin: 0;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4a6fff;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success-result {
+            background-color: #d1e7dd;
+            border: 1px solid #badbcc;
+        }
+        .error-result {
+            background-color: #f8d7da;
+            border: 1px solid #f5c2c7;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>TikTok Authorization Complete</h1>
-        <p class="success">Authentication successful!</p>
-        <div class="params">
-            <p><strong>Authorization code:</strong> <span id="code">Loading...</span></p>
-            <p><strong>State:</strong> <span id="state">Loading...</span></p>
+        <h1>TikTok Authorization Handler</h1>
+        <p class="success">Authentication successful! Your authorization code has been captured.</p>
+        
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'AuthCode')">Get Code</button>
+            <button class="tablinks" onclick="openTab(event, 'ExchangeToken')">Exchange Token</button>
         </div>
-        <p>You can now close this window and return to your application.</p>
+        
+        <div id="AuthCode" class="tabcontent" style="display: block;">
+            <div class="instructions">
+                <h3>Instructions:</h3>
+                <ol>
+                    <li>Copy the authorization code below using the "Copy" button</li>
+                    <li>Return to your application console or use the "Exchange Token" tab</li>
+                    <li>Paste ONLY the code when prompted</li>
+                    <li>Do not include any extra spaces or characters</li>
+                </ol>
+            </div>
+            
+            <h2>Your Authorization Code:</h2>
+            <div class="code-display" id="original-code-container">
+                <span id="original-code">Loading...</span>
+                <button class="copy-btn" onclick="copyCode('original-code')">Copy</button>
+            </div>
+            
+            <button class="accordion">Alternative Code Formats (Try these if original fails)</button>
+            <div class="panel">
+                <h3>Troubleshooting Variations:</h3>
+                <p>If the original code doesn't work, try one of these alternative formats:</p>
+                
+                <div class="code-variations" id="code-variations">
+                    <!-- Will be filled by JavaScript -->
+                </div>
+            </div>
+            
+            <p>You can close this window after copying the code, or continue to the Token Exchange tab.</p>
+            
+            <div class="debug-section" id="debug-section">
+                <h3>Debug Information</h3>
+                <p><strong>State:</strong> <span id="state">Loading...</span></p>
+                <p><strong>Code challenge method:</strong> S256</p>
+                <button class="accordion">Advanced Parameters</button>
+                <div class="panel">
+                    <p>If you're experiencing authorization issues, complete these parameters in your token exchange request:</p>
+                    <ul>
+                        <li><strong>grant_type:</strong> authorization_code</li>
+                        <li><strong>redirect_uri:</strong> <span id="redirect-uri">https://tends2ravi.github.io/tikscheduler.app/</span></li>
+                        <li><strong>client_key:</strong> [your client key]</li>
+                        <li><strong>client_secret:</strong> [your client secret]</li>
+                        <li><strong>code:</strong> [the authorization code above]</li>
+                        <li><strong>code_verifier:</strong> [the code verifier you generated]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="ExchangeToken" class="tabcontent">
+            <h2>Exchange Authorization Code for Token</h2>
+            <p>Use this form to directly exchange your authorization code for a token.</p>
+            
+            <div class="form-group">
+                <label for="client-key">Client Key:</label>
+                <input type="text" id="client-key" placeholder="Your TikTok client key">
+            </div>
+            
+            <div class="form-group">
+                <label for="client-secret">Client Secret:</label>
+                <input type="password" id="client-secret" placeholder="Your TikTok client secret">
+            </div>
+            
+            <div class="form-group">
+                <label for="code-verifier">Code Verifier:</label>
+                <input type="text" id="code-verifier" placeholder="PKCE code verifier from your application">
+            </div>
+            
+            <div class="form-group">
+                <label for="auth-code">Authorization Code:</label>
+                <input type="text" id="auth-code" placeholder="Will be automatically filled from the URL">
+            </div>
+            
+            <button onclick="exchangeToken()">Exchange Token</button>
+            
+            <div id="exchange-result" class="result-box">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+        
         <div class="info">
-            <p>This page securely captures the OAuth parameters from TikTok.</p>
-            <p>No data is sent to any server - this is processed entirely in your browser.</p>
+            <p>This page securely captures OAuth parameters from TikTok.</p>
+            <p>No data is sent to any server - all processing happens in your browser.</p>
+            <p>Your client credentials are never stored or transmitted outside of the token exchange process.</p>
         </div>
     </div>
     
@@ -61,15 +286,336 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Get URL parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const state = urlParams.get('state');
+            const code = urlParams.get('code') || 'No code provided';
+            const state = urlParams.get('state') || 'No state provided';
             
-            // Display parameters
-            document.getElementById('code').textContent = code || 'Not provided';
-            document.getElementById('state').textContent = state || 'Not provided';
+            // Display original code
+            document.getElementById('original-code').textContent = code;
+            document.getElementById('state').textContent = state;
             
-            // Optional: Copy to clipboard functionality could be added here
+            // Auto-fill the authorization code in the exchange form
+            document.getElementById('auth-code').value = code;
+            
+            // Generate code variations
+            createCodeVariations(code);
+            
+            // Setup accordions
+            setupAccordions();
         });
+        
+        function createCodeVariations(code) {
+            const variations = [];
+            
+            // Variation 1: Truncate at asterisk
+            const starIndex = code.indexOf('*');
+            if (starIndex > 0) {
+                variations.push({
+                    name: "Truncated at *",
+                    value: code.substring(0, starIndex),
+                    description: "Removes '*' and everything after it"
+                });
+            }
+            
+            // Variation 2: Clean alphanumeric only
+            const cleanCode = code.replace(/[^a-zA-Z0-9\-_]/g, '');
+            if (cleanCode !== code) {
+                variations.push({
+                    name: "Alphanumeric Only",
+                    value: cleanCode,
+                    description: "Keeps only letters, numbers, hyphens and underscores"
+                });
+            }
+            
+            // Variation 3: Replace * with %2A
+            if (starIndex > 0) {
+                variations.push({
+                    name: "URL-encoded Asterisk",
+                    value: code.replace(/\*/g, '%2A'),
+                    description: "Replaces '*' with its URL-encoded form '%2A'"
+                });
+            }
+            
+            // Add variations to the page
+            const container = document.getElementById('code-variations');
+            variations.forEach((variation, index) => {
+                const id = `variation-${index}`;
+                const html = `
+                    <div class="code-variation">
+                        <h4>${variation.name}</h4>
+                        <p>${variation.description}</p>
+                        <div class="code-display">
+                            <span id="${id}">${variation.value}</span>
+                            <button class="copy-btn" onclick="copyCode('${id}')">Copy</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+        
+        function copyCode(elementId) {
+            const codeText = document.getElementById(elementId).textContent;
+            
+            navigator.clipboard.writeText(codeText)
+                .then(() => {
+                    alert('Code copied to clipboard!');
+                })
+                .catch(err => {
+                    console.error('Could not copy text: ', err);
+                    
+                    // Fallback for browsers that don't support clipboard API
+                    const textArea = document.createElement('textarea');
+                    textArea.value = codeText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    alert('Code copied to clipboard!');
+                });
+        }
+        
+        function setupAccordions() {
+            const acc = document.getElementsByClassName("accordion");
+            for (let i = 0; i < acc.length; i++) {
+                acc[i].addEventListener("click", function() {
+                    this.classList.toggle("active");
+                    const panel = this.nextElementSibling;
+                    if (panel.style.maxHeight) {
+                        panel.style.maxHeight = null;
+                    } else {
+                        panel.style.maxHeight = panel.scrollHeight + "px";
+                    }
+                });
+            }
+        }
+        
+        function openTab(evt, tabName) {
+            // Get all tab content and hide them
+            const tabcontent = document.getElementsByClassName("tabcontent");
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+
+            // Remove active class from all tabs
+            const tablinks = document.getElementsByClassName("tablinks");
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+
+            // Show the current tab and add active class
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        // Function to exchange token directly from the browser
+        function exchangeToken() {
+            const resultElement = document.getElementById('exchange-result');
+            resultElement.innerHTML = '<p>Attempting to exchange token...</p>';
+            resultElement.className = 'result-box';
+            resultElement.style.display = 'block';
+            
+            // Get form values
+            const clientKey = document.getElementById('client-key').value.trim();
+            const clientSecret = document.getElementById('client-secret').value.trim();
+            const codeVerifier = document.getElementById('code-verifier').value.trim();
+            const authCode = document.getElementById('auth-code').value.trim();
+            const redirectUri = document.getElementById('redirect-uri').textContent.trim();
+            
+            // Validate inputs
+            if (!clientKey || !clientSecret || !codeVerifier || !authCode) {
+                resultElement.innerHTML = '<p class="error">Error: All fields are required</p>';
+                resultElement.className = 'result-box error-result';
+                return;
+            }
+            
+            // Prepare request data
+            const data = {
+                client_key: clientKey,
+                client_secret: clientSecret,
+                code: authCode,
+                grant_type: 'authorization_code',
+                redirect_uri: redirectUri,
+                code_verifier: codeVerifier
+            };
+            
+            // Create fetch request
+            resultElement.innerHTML = '<p>Sending token exchange request...</p>';
+            
+            // Try multiple code formats if needed
+            tryExchangeWithVariations(authCode, data, resultElement);
+        }
+        
+        // Try token exchange with multiple code variations
+        function tryExchangeWithVariations(authCode, data, resultElement) {
+            const tokenUrl = 'https://open.tiktokapis.com/v2/oauth/token/';
+            const variations = [];
+            
+            // Original code
+            variations.push({
+                name: "Original",
+                code: authCode
+            });
+            
+            // Truncated code (if applicable)
+            const starIndex = authCode.indexOf('*');
+            if (starIndex > 0) {
+                variations.push({
+                    name: "Truncated",
+                    code: authCode.substring(0, starIndex)
+                });
+            }
+            
+            // Clean code
+            const cleanCode = authCode.replace(/[^a-zA-Z0-9\-_]/g, '');
+            if (cleanCode !== authCode) {
+                variations.push({
+                    name: "Alphanumeric",
+                    code: cleanCode
+                });
+            }
+            
+            // Try each variation
+            let attemptIndex = 0;
+            
+            function tryNextVariation() {
+                if (attemptIndex >= variations.length) {
+                    resultElement.innerHTML = '<p class="error">All attempts failed. Please try using the standalone token exchange utility.</p>';
+                    resultElement.className = 'result-box error-result';
+                    return;
+                }
+                
+                const variation = variations[attemptIndex];
+                resultElement.innerHTML = `<p>Trying ${variation.name} code format...</p>`;
+                
+                // Update code in data
+                const requestData = {...data, code: variation.code};
+                
+                // First try form-encoded
+                fetch(tokenUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams(requestData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(JSON.stringify(data));
+                        });
+                    }
+                    return response.json();
+                })
+                .then(tokenData => {
+                    handleSuccessfulResponse(tokenData, resultElement);
+                })
+                .catch(error => {
+                    console.error('Form-encoded attempt failed:', error);
+                    
+                    // Try with JSON format
+                    fetch(tokenUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(data => {
+                                throw new Error(JSON.stringify(data));
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(tokenData => {
+                        handleSuccessfulResponse(tokenData, resultElement);
+                    })
+                    .catch(error => {
+                        console.error('JSON attempt failed:', error);
+                        attemptIndex++;
+                        tryNextVariation();
+                    });
+                });
+            }
+            
+            // Start the process
+            tryNextVariation();
+        }
+        
+        // Handle successful token response
+        function handleSuccessfulResponse(tokenData, resultElement) {
+            // Check for access token in data field
+            if ('access_token' in tokenData) {
+                displayTokenSuccess(tokenData, resultElement);
+                return;
+            }
+            
+            if ('data' in tokenData && 'access_token' in tokenData.data) {
+                displayTokenSuccess(tokenData.data, resultElement);
+                return;
+            }
+            
+            // No access token found
+            resultElement.innerHTML = `
+                <p class="error">Response received but no access token found.</p>
+                <pre>${JSON.stringify(tokenData, null, 2)}</pre>
+            `;
+            resultElement.className = 'result-box error-result';
+        }
+        
+        // Display success message with token
+        function displayTokenSuccess(tokenData, resultElement) {
+            const expiresIn = tokenData.expires_in || 'unknown';
+            const scope = tokenData.scope || 'unknown';
+            
+            const html = `
+                <h3 class="success">Token Exchange Successful!</h3>
+                <p>You have successfully obtained an access token for the TikTok API.</p>
+                <div class="form-group">
+                    <label for="access-token">Access Token:</label>
+                    <input type="text" id="access-token" value="${tokenData.access_token}" readonly>
+                    <button onclick="copyToken('access-token')">Copy</button>
+                </div>
+                <p><strong>Token Type:</strong> ${tokenData.token_type || 'Bearer'}</p>
+                <p><strong>Expires In:</strong> ${expiresIn} seconds</p>
+                <p><strong>Scope:</strong> ${scope}</p>
+                <p><strong>Refresh Token:</strong> ${tokenData.refresh_token ? 'Available' : 'Not available'}</p>
+                <p>Copy this token and use it in your application, or download the complete token data:</p>
+                <button onclick="downloadTokenData(${JSON.stringify(tokenData)})">Download Token Data (JSON)</button>
+            `;
+            
+            resultElement.innerHTML = html;
+            resultElement.className = 'result-box success-result';
+        }
+        
+        // Copy token to clipboard
+        function copyToken(elementId) {
+            const token = document.getElementById(elementId).value;
+            navigator.clipboard.writeText(token)
+                .then(() => {
+                    alert('Access token copied to clipboard!');
+                })
+                .catch(err => {
+                    alert('Could not copy token. Please select and copy manually.');
+                });
+        }
+        
+        // Download token data as JSON file
+        function downloadTokenData(tokenData) {
+            const jsonString = JSON.stringify(tokenData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tiktok_token.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
     </script>
 </body>
 </html>
