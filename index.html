@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Authorization Complete</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 50px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .params {
+            background-color: #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        h1 {
+            color: #333;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .info {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TikTok Authorization Complete</h1>
+        <p class="success">Authentication successful!</p>
+        <div class="params">
+            <p><strong>Authorization code:</strong> <span id="code">Loading...</span></p>
+            <p><strong>State:</strong> <span id="state">Loading...</span></p>
+        </div>
+        <p>You can now close this window and return to your application.</p>
+        <div class="info">
+            <p>This page securely captures the OAuth parameters from TikTok.</p>
+            <p>No data is sent to any server - this is processed entirely in your browser.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            
+            // Display parameters
+            document.getElementById('code').textContent = code || 'Not provided';
+            document.getElementById('state').textContent = state || 'Not provided';
+            
+            // Optional: Copy to clipboard functionality could be added here
+        });
+    </script>
+</body>
+</html>
